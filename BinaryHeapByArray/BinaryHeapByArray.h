@@ -8,19 +8,16 @@ typedef enum BHOption {
     BH_OPTION_NONE,
     BH_OPTION_WITH_ELEMENT,
     
-    BH_OPTION_BREADTH_FIRST_SEARCH = 10,
-    BH_OPTION_DEPTH_FIRST_SEARCH,
-    
     BH_OPTION_VIEW_INT = 20,
     BH_OPTION_VIEW_CHAR
 } BH_OPTION_e;
 
-typedef struct BinaryTree_Node {
+typedef struct BinaryHeap_Node {
     int priority;
     void *element;
 } BHN_t;
 
-typedef struct BinaryTree {
+typedef struct BinaryHeap {
     int capacity;
     BHN_t **array;
 } BH_t;

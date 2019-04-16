@@ -47,13 +47,13 @@ void test() {
     }
     
     printf("*** pull ***\n");
-    printf("--- Binary Tree ---\n");
+    printf("--- Binary Heep ---\n");
     viewBH(B, BH_OPTION_VIEW_INT);
     
     while (true) {
         Element_t *element = pullMinPriorityElementOnBH(B);
         if (element != NULL) {
-            printf("pull value : %d : success.\n", element->value);
+            printf("pull priority : %d : success.\n", element->value);
             destroyElement(element);
         }
         else {
@@ -61,7 +61,7 @@ void test() {
             break;
         }
 
-        printf("--- Binary Tree ---\n");
+        printf("--- Binary Heep ---\n");
         viewBH(B, BH_OPTION_VIEW_INT);
     }
     

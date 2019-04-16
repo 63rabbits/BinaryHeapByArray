@@ -10,7 +10,6 @@
 #define getParent(v) ((v - 1) / 2)
 #define getLeftIndex(v) (v * 2 + 1)
 #define getRightIndex(v) (v * 2 + 2)
-#define max(a, b) (a > b ? a : b)
 
 //////////////////////////////////////////////////
 //  private
