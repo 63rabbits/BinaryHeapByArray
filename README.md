@@ -1,3 +1,3 @@
 # BinaryHeapByArray
 
-BinaryHeapByArray using array.
+Binary Heap using array.
