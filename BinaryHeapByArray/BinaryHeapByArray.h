@@ -19,6 +19,7 @@ typedef struct BinaryHeap_Node {
 
 typedef struct BinaryHeap {
     int capacity;
+    int num;
     BHN_t **array;
 } BH_t;
 
@@ -28,7 +29,10 @@ bool destroyBH(BH_t *B, BH_OPTION_e option);
 bool insertElementOnBH(BH_t *B, int priority, void *element);
 void *pullMinPriorityElementOnBH(BH_t *B);
 int getHeightBH(BH_t *B, int rootIndex);
-// for debug
+int throwElementInBH(BH_t *B, int priority, void *element);
+bool heapingOnBH(BH_t *B);
+#ifdef DEBUG
 void viewBH(BH_t *B, BH_OPTION_e option);
+#endif
 
 #endif

@@ -13,12 +13,10 @@
 
 //////////////////////////////////////////////////
 //  private
-int findLeftmostEmptyNodeIndexOnBH(BH_t *B);
 void autoExpandArrayOnBH(BH_t *B);
-int findRightmostLeafIndexOnBH(BH_t *B);
-void percolateOnBH(BH_t *B, int rootIndex);
-void percolateUpOnBH(BH_t *B, int rootIndex);
-void percolateDownOnBH(BH_t *B, int rootIndex);
+bool percolateOnBH(BH_t *B, int rootIndex);
+bool percolateUpOnBH(BH_t *B, int rootIndex);
+bool percolateDownOnBH(BH_t *B, int rootIndex);
 void swapNodeOnBH(BH_t *B, int indexA, int indexB);
 void *getElementOnBH(BH_t *B, int rootIndex);
 
@@ -28,6 +26,7 @@ BH_t *createBH(void) {
     BH_t *B = malloc(sizeof(BH_t));
     if (B == NULL) return NULL;
     B->capacity = BH_INITIAL_CAPACITY;
+    B->num = 0;
     B->array = calloc(B->capacity, sizeof(BHN_t**));
     if (B->array == NULL) {
         free(B);
@@ -58,53 +57,66 @@ bool destroyBH(BH_t *B, BH_OPTION_e option) {
 }
 
 bool insertElementOnBH(BH_t *B, int priority, void *element) {
-    int emptyIndex = -1;
-    while (true) {
-        emptyIndex = findLeftmostEmptyNodeIndexOnBH(B);
-        if (emptyIndex >= 0) break;
-        autoExpandArrayOnBH(B);
-    }
-    BHN_t *node = malloc(sizeof(BHN_t));
-    if (node == NULL) return false;
-    node->priority = priority;
-    node->element = element;
-    B->array[emptyIndex] = node;
-    percolateOnBH(B, emptyIndex);
+    int index = throwElementInBH(B, priority, element);
+    if (index < 0) return false;
+    percolateOnBH(B, index);
     return true;
 }
 
 void *pullMinPriorityElementOnBH(BH_t *B) {
+    if (B->num <= 0) return NULL;
+
     //    Consider a subtree rooted at the node to be deleted.
     //    Replace the deletion node with the leftmost leaf of the subtree.
     int rootIndex = 0;
-    int rightmostIndex = findRightmostLeafIndexOnBH(B);
-    if (rightmostIndex < 0) return NULL;
-    
+    int rightmostIndex = B->num - 1;
     void *element = getElementOnBH(B, rootIndex);
     free(B->array[rootIndex]);
     B->array[rootIndex] = NULL;
-    if (rootIndex == rightmostIndex) return element;
+    if (rootIndex == rightmostIndex) {
+        B->num--;
+        return element;
+    }
     
     B->array[rootIndex] = B->array[rightmostIndex];
     B->array[rightmostIndex] = NULL;
     percolateOnBH(B, rootIndex);
+    B->num--;
     return element;
 }
 
 int getHeightBH(BH_t *B, int rootIndex) {
-    int rightmost = -1;
-    for (int i=B->capacity - 1; i>=0; i--) {
-        if (B->array[i] != NULL) {
-            rightmost = i;
-            break;
-        }
-    }
-    int height = 0;
-    if (rightmost >= 0) {
-        height = floor(log2(rightmost + 1));
+    int height = -1;
+    if (B->num > 0) {
+        height = floor(log2(B->num));
     }
     
     return height;
+}
+
+int throwElementInBH(BH_t *B, int priority, void *element) {
+    int emptyIndex = B->num;
+    if (emptyIndex >= B->capacity) {
+        autoExpandArrayOnBH(B);
+    }
+    BHN_t *node = malloc(sizeof(BHN_t));
+    if (node == NULL) return -1;
+    node->priority = priority;
+    node->element = element;
+    B->array[emptyIndex] = node;
+    B->num++;
+    return emptyIndex;
+}
+
+bool heapingOnBH(BH_t *B) {
+    bool result = false;
+    int rightmostIndex = B->num - 1;
+    int parentIndex = getParent(rightmostIndex);
+    for (int i=parentIndex; i>=0; i--) {
+        bool check = percolateOnBH(B, i);
+        result = (result || check);
+    }
+    return result;
 }
 
 //////////////////////////////////////////////////
@@ -118,36 +130,25 @@ void autoExpandArrayOnBH(BH_t *B) {
     B->capacity = newSize;
 }
 
-int findLeftmostEmptyNodeIndexOnBH(BH_t *B) {
-    int leftmostEmptyIndex = findRightmostLeafIndexOnBH(B) + 1;
-    if (leftmostEmptyIndex < B->capacity) return leftmostEmptyIndex;
-    return -1;
+bool percolateOnBH(BH_t *B, int rootIndex) {
+    bool check1 = percolateUpOnBH(B, rootIndex);
+    bool check2 = percolateDownOnBH(B, rootIndex);
+    return (check1 || check2);
 }
 
-int findRightmostLeafIndexOnBH(BH_t *B) {
-    for (int i=B->capacity-1; i>=0; i--) {
-        if (B->array[i] != NULL) return i;
-    }
-    return -1;
-}
-
-void percolateOnBH(BH_t *B, int rootIndex) {
-    percolateUpOnBH(B, rootIndex);
-    percolateDownOnBH(B, rootIndex);
-}
-
-void percolateUpOnBH(BH_t *B, int rootIndex) {
+bool percolateUpOnBH(BH_t *B, int rootIndex) {
     int parentIndex = getParent(rootIndex);
-    if (parentIndex == rootIndex) return;
+    if (parentIndex == rootIndex) return false;
     
     BHN_t *parent = B->array[parentIndex];
     BHN_t *root = B->array[rootIndex];
-    if (parent->priority <= root->priority) return;
+    if (parent->priority <= root->priority) return false;
     swapNodeOnBH(B, parentIndex, rootIndex);
-    return percolateUpOnBH(B, parentIndex);
+    percolateUpOnBH(B, parentIndex);
+    return true;
 }
 
-void percolateDownOnBH(BH_t *B, int rootIndex) {
+bool percolateDownOnBH(BH_t *B, int rootIndex) {
     int leftIndex = getLeftIndex(rootIndex);
     BHN_t *left = NULL;
     int leftKeyValue = INT_MAX;
@@ -166,12 +167,13 @@ void percolateDownOnBH(BH_t *B, int rootIndex) {
         rightKeyValue = right->priority;
     }
     
-    if ((left == NULL) && (right == NULL)) return;
+    if ((left == NULL) && (right == NULL)) return false;
     
     int minIndex = leftKeyValue <= rightKeyValue ? leftIndex : rightIndex;
-    if (B->array[minIndex]->priority > B->array[rootIndex]->priority) return;
+    if (B->array[minIndex]->priority >= B->array[rootIndex]->priority) return false;
     swapNodeOnBH(B, rootIndex, minIndex);
-    return percolateDownOnBH(B, minIndex);
+    percolateDownOnBH(B, minIndex);
+    return true;
 }
 
 void swapNodeOnBH(BH_t *B, int indexA, int indexB) {
@@ -187,6 +189,7 @@ void *getElementOnBH(BH_t *B, int rootIndex) {
     return B->array[rootIndex]->element;
 }
 
+#ifdef DEBUG
 //////////////////////////////////////////////////
 //  debug
 void viewBH(BH_t *B, BH_OPTION_e option) {
@@ -251,4 +254,4 @@ void viewBH(BH_t *B, BH_OPTION_e option) {
     }
     printf("\n");
 }
-
+#endif

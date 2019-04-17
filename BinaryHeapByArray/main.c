@@ -35,37 +35,119 @@ int main(int argc, const char * argv[]) {
 }
 
 void test() {
+    int testCount = 10;
     int numElement = 30;
     srand((unsigned) time(NULL));
-
-    BH_t *B = createBH();
-
-    for (int i=0; i<numElement; i++) {
-        int value = rand() % 100;
-        Element_t *element = createElement(value);
-        insertElementOnBH(B, value ,element);
-    }
     
-    printf("*** pull ***\n");
-    printf("--- Binary Heep ---\n");
-    viewBH(B, BH_OPTION_VIEW_INT);
-    
-    while (true) {
-        Element_t *element = pullMinPriorityElementOnBH(B);
-        if (element != NULL) {
-            printf("pull priority : %d : success.\n", element->value);
-            destroyElement(element);
+    for (int testNo=0; testNo<testCount; testNo++) {
+        printf("\n*** [Test #%d] ***\n", testNo+1);
+        
+        switch (testNo) {
+            case 0:
+            {
+                BH_t *B = createBH();
+
+                printf("\n*** insert ***\n");
+                
+                for (int i=0; i<numElement; i++) {
+                    int value = rand() % 100;
+                    Element_t *element = createElement(value);
+                    printf("insert [%d] priority : %d\n", i, element->value);
+                    insertElementOnBH(B, value ,element);
+                }
+                
+                printf("\n*** heaping ***\n");
+                bool check = heapingOnBH(B);
+                if (check) {
+                    printf("heaping occured.\n");
+                }
+                else {
+                    printf("heaping did not occur.\n");
+                }
+                
+                printf("\n*** pull ***\n");
+                
+#ifdef DEBUG
+                printf("\n--- Binary Heep ---\n");
+                viewBH(B, BH_OPTION_VIEW_INT);
+#endif
+                
+                int count = 0;
+                while (true) {
+                    Element_t *element = pullMinPriorityElementOnBH(B);
+                    if (element != NULL) {
+                        printf("pull [%d] priority : %d\n", count++, element->value);
+                        destroyElement(element);
+                    }
+                    else {
+                        printf("error [%s] : could not pull the element.\n", __func__);
+                        break;
+                    }
+                    
+#ifdef DEBUG
+                    printf("\n--- Binary Heep ---\n");
+                    viewBH(B, BH_OPTION_VIEW_INT);
+#endif
+                }
+                destroyBH(B, BH_OPTION_WITH_ELEMENT);
+            }
+                break;
+            case 1:
+            {
+                BH_t *B = createBH();
+
+                printf("\n*** throw in ***\n");
+                
+                for (int i=0; i<numElement; i++) {
+                    int value = rand() % 100;
+                    Element_t *element = createElement(value);
+                    printf("throw in [%d] priority : %d\n", i, element->value);
+                    throwElementInBH(B, value ,element);
+                }
+                
+                printf("\n*** heaping ***\n");
+                bool check = heapingOnBH(B);
+                if (check) {
+                    printf("heaping occured.\n");
+                }
+                else {
+                    printf("heaping did not occur.\n");
+                }
+                
+                printf("\n*** pull ***\n");
+                
+#ifdef DEBUG
+                printf("\n--- Binary Heep ---\n");
+                viewBH(B, BH_OPTION_VIEW_INT);
+#endif
+                
+                int count = 0;
+                while (true) {
+                    Element_t *element = pullMinPriorityElementOnBH(B);
+                    if (element != NULL) {
+                        printf("pull [%d] priority : %d\n", count++, element->value);
+                        destroyElement(element);
+                    }
+                    else {
+                        printf("error [%s] : could not pull the element.\n", __func__);
+                        break;
+                    }
+                    
+#ifdef DEBUG
+                    printf("\n--- Binary Heep ---\n");
+                    viewBH(B, BH_OPTION_VIEW_INT);
+#endif
+                }
+                destroyBH(B, BH_OPTION_WITH_ELEMENT);
+            }
+                // *************************************
+                testNo = INT_MAX - 1;        // stop loop.
+                // *************************************
+                break;
+            default:
+                break;
         }
-        else {
-            printf("error [%s] : could not pull the element.\n", __func__);
-            break;
-        }
-
-        printf("--- Binary Heep ---\n");
-        viewBH(B, BH_OPTION_VIEW_INT);
     }
-    
-    destroyBH(B, BH_OPTION_WITH_ELEMENT);
 }
 
 Element_t *createElement(int value) {
