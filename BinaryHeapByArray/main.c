@@ -36,7 +36,7 @@ int main(int argc, const char * argv[]) {
 
 void test() {
     int testCount = 10;
-    int numElement = 30;
+    int numElement = 100;
     srand((unsigned) time(NULL));
     
     for (int testNo=0; testNo<testCount; testNo++) {
@@ -65,13 +65,17 @@ void test() {
                     printf("heaping did not occur.\n");
                 }
                 
+                printf("\n*** status ***\n");
+                printf("height of tree  = %d\n", getHeightBH(B, 0));
+                printf("capacity        = %d\n", B->capacity);
+                printf("num of elements = %d\n", B->num);
+                printf("use rate        = %-5.2lf%%\n", B->num/(double)B->capacity*100);
+
                 printf("\n*** pull ***\n");
-                
 #ifdef DEBUG
                 printf("\n--- Binary Heep ---\n");
                 viewBH(B, BH_OPTION_VIEW_INT);
 #endif
-                
                 int count = 0;
                 while (true) {
                     Element_t *element = pullMinPriorityElementOnBH(B);
@@ -83,7 +87,6 @@ void test() {
                         printf("error [%s] : could not pull the element.\n", __func__);
                         break;
                     }
-                    
 #ifdef DEBUG
                     printf("\n--- Binary Heep ---\n");
                     viewBH(B, BH_OPTION_VIEW_INT);
@@ -114,13 +117,17 @@ void test() {
                     printf("heaping did not occur.\n");
                 }
                 
+                printf("\n*** status ***\n");
+                printf("height of tree  = %d\n", getHeightBH(B, 0));
+                printf("capacity        = %d\n", B->capacity);
+                printf("num of elements = %d\n", B->num);
+                printf("use rate        = %-5.2lf%%\n", B->num/(double)B->capacity*100);
+
                 printf("\n*** pull ***\n");
-                
 #ifdef DEBUG
                 printf("\n--- Binary Heep ---\n");
                 viewBH(B, BH_OPTION_VIEW_INT);
 #endif
-                
                 int count = 0;
                 while (true) {
                     Element_t *element = pullMinPriorityElementOnBH(B);
@@ -132,7 +139,6 @@ void test() {
                         printf("error [%s] : could not pull the element.\n", __func__);
                         break;
                     }
-                    
 #ifdef DEBUG
                     printf("\n--- Binary Heep ---\n");
                     viewBH(B, BH_OPTION_VIEW_INT);

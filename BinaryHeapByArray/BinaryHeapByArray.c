@@ -59,7 +59,7 @@ bool destroyBH(BH_t *B, BH_OPTION_e option) {
 bool insertElementOnBH(BH_t *B, int priority, void *element) {
     int index = throwElementInBH(B, priority, element);
     if (index < 0) return false;
-    percolateOnBH(B, index);
+    percolateUpOnBH(B, index);
     return true;
 }
 
@@ -80,7 +80,7 @@ void *pullMinPriorityElementOnBH(BH_t *B) {
     
     B->array[rootIndex] = B->array[rightmostIndex];
     B->array[rightmostIndex] = NULL;
-    percolateOnBH(B, rootIndex);
+    percolateDownOnBH(B, rootIndex);
     B->num--;
     return element;
 }
@@ -113,7 +113,7 @@ bool heapingOnBH(BH_t *B) {
     int rightmostIndex = B->num - 1;
     int parentIndex = getParent(rightmostIndex);
     for (int i=parentIndex; i>=0; i--) {
-        bool check = percolateOnBH(B, i);
+        bool check = percolateDownOnBH(B, i);
         result = (result || check);
     }
     return result;
