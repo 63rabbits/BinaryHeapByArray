@@ -13,7 +13,7 @@
 
 //////////////////////////////////////////////////
 //  private
-void autoExpandArrayOnBH(BH_t *B);
+bool autoExpandArrayOnBH(BH_t *B);
 bool percolateOnBH(BH_t *B, int rootIndex);
 bool percolateUpOnBH(BH_t *B, int rootIndex);
 bool percolateDownOnBH(BH_t *B, int rootIndex);
@@ -102,7 +102,8 @@ int throwElementInBH(BH_t *B, int priority, void *element) {
     if (B == NULL) return -1;
     int emptyIndex = B->num;
     if (emptyIndex >= B->capacity) {
-        autoExpandArrayOnBH(B);
+        bool check = autoExpandArrayOnBH(B);
+        if (!check) return -1;
     }
     BHN_t *node = malloc(sizeof(BHN_t));
     if (node == NULL) return -1;
@@ -171,13 +172,15 @@ void *getElementOnBH(BH_t *B, int rootIndex) {
 
 //////////////////////////////////////////////////
 //  private
-void autoExpandArrayOnBH(BH_t *B) {
+bool autoExpandArrayOnBH(BH_t *B) {
     int newSize = B->capacity << 1;
+    if (newSize <= B->capacity) return false;
     B->array = realloc(B->array, sizeof(BHN_t**) * newSize);
     for (int i=B->capacity; i<newSize; i++) {
         B->array[i] = NULL;
     }
     B->capacity = newSize;
+    return true;
 }
 
 bool percolateOnBH(BH_t *B, int rootIndex) {
