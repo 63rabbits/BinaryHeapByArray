@@ -29,8 +29,14 @@ bool destroyBH(BH_t *B, BH_OPTION_e option);
 bool insertElementOnBH(BH_t *B, int priority, void *element);
 void *pullMinPriorityElementOnBH(BH_t *B);
 int getHeightBH(BH_t *B, int rootIndex);
+
 int throwElementInBH(BH_t *B, int priority, void *element);
 bool heapingOnBH(BH_t *B);
+
+void *peekMinPriorityElementOnBH(BH_t *B);
+void *peekMaxPriorityElementOnBH(BH_t *B);
+void *pullMaxPriorityElementOnBH(BH_t *B);
+
 #ifdef DEBUG
 void viewBH(BH_t *B, BH_OPTION_e option);
 #endif

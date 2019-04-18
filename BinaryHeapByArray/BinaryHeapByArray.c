@@ -19,6 +19,7 @@ bool percolateUpOnBH(BH_t *B, int rootIndex);
 bool percolateDownOnBH(BH_t *B, int rootIndex);
 void swapNodeOnBH(BH_t *B, int indexA, int indexB);
 void *getElementOnBH(BH_t *B, int rootIndex);
+int peekMaxPriorityElementIndexOnBH(BH_t *B);
 
 //////////////////////////////////////////////////
 //  public
@@ -57,6 +58,7 @@ bool destroyBH(BH_t *B, BH_OPTION_e option) {
 }
 
 bool insertElementOnBH(BH_t *B, int priority, void *element) {
+    if (B == NULL) return false;
     int index = throwElementInBH(B, priority, element);
     if (index < 0) return false;
     percolateUpOnBH(B, index);
@@ -64,6 +66,7 @@ bool insertElementOnBH(BH_t *B, int priority, void *element) {
 }
 
 void *pullMinPriorityElementOnBH(BH_t *B) {
+    if (B == NULL) return NULL;
     if (B->num <= 0) return NULL;
 
     //    Consider a subtree rooted at the node to be deleted.
@@ -86,15 +89,17 @@ void *pullMinPriorityElementOnBH(BH_t *B) {
 }
 
 int getHeightBH(BH_t *B, int rootIndex) {
+    if (B == NULL) return -1;
     int height = -1;
     if (B->num > 0) {
-        height = floor(log2(B->num));
+        height = log2(B->num);
     }
     
     return height;
 }
 
 int throwElementInBH(BH_t *B, int priority, void *element) {
+    if (B == NULL) return -1;
     int emptyIndex = B->num;
     if (emptyIndex >= B->capacity) {
         autoExpandArrayOnBH(B);
@@ -109,6 +114,7 @@ int throwElementInBH(BH_t *B, int priority, void *element) {
 }
 
 bool heapingOnBH(BH_t *B) {
+    if (B == NULL) return false;
     bool result = false;
     int rightmostIndex = B->num - 1;
     int parentIndex = getParent(rightmostIndex);
@@ -117,6 +123,50 @@ bool heapingOnBH(BH_t *B) {
         result = (result || check);
     }
     return result;
+}
+
+void *peekMinPriorityElementOnBH(BH_t *B) {
+    if (B == NULL) return NULL;
+    if (B->num <= 0) return NULL;
+    int rootIndex = 0;
+    return getElementOnBH(B, rootIndex);
+}
+
+void *peekMaxPriorityElementOnBH(BH_t *B) {
+    int index = peekMaxPriorityElementIndexOnBH(B);
+    if (index < 0) return NULL;
+    return getElementOnBH(B, index);
+}
+
+void *pullMaxPriorityElementOnBH(BH_t *B) {
+    if (B == NULL) return NULL;
+    if (B->num <= 0) return NULL;
+
+    int maxIndex = peekMaxPriorityElementIndexOnBH(B);
+    if (maxIndex < 0) return NULL;
+    
+    int rightmostIndex = B->num - 1;
+    void *element = getElementOnBH(B, maxIndex);
+    free(B->array[maxIndex]);
+    B->array[maxIndex] = NULL;
+    if (maxIndex == rightmostIndex) {
+        B->num--;
+        return element;
+    }
+    
+    B->array[maxIndex] = B->array[rightmostIndex];
+    B->array[rightmostIndex] = NULL;
+    percolateUpOnBH(B, maxIndex);
+    B->num--;
+    return element;
+}
+
+void *getElementOnBH(BH_t *B, int rootIndex) {
+    // Block illegal parameters.
+    if (B == NULL) return NULL;
+    if (rootIndex < 0) return NULL;
+    
+    return B->array[rootIndex]->element;
 }
 
 //////////////////////////////////////////////////
@@ -182,17 +232,29 @@ void swapNodeOnBH(BH_t *B, int indexA, int indexB) {
     B->array[indexB] = temp;
 }
 
-void *getElementOnBH(BH_t *B, int rootIndex) {
-    // Block illegal parameters.
-    if (B == NULL) return NULL;
-    
-    return B->array[rootIndex]->element;
+int peekMaxPriorityElementIndexOnBH(BH_t *B) {
+    if (B == NULL) return -1;
+    if (B->num <= 0) return -1;
+    int lastIndex = B->num - 1;
+    if (lastIndex == 0) return 0;
+    int firstLeafIndex = getParent(lastIndex) + 1;
+    int max = INT_MIN;
+    int maxIndex = -1;
+    for (int i=firstLeafIndex; i<B->num; i++) {
+        int priority = B->array[i]->priority;
+        if (priority >= max) {
+            maxIndex = i;
+            max = priority;
+        }
+    }
+    return maxIndex;
 }
 
 #ifdef DEBUG
 //////////////////////////////////////////////////
 //  debug
 void viewBH(BH_t *B, BH_OPTION_e option) {
+    printf("\n--- Binary Heep ---\n");
     int root = 0;
     int wordWidth = 4;
     if (option == BH_OPTION_VIEW_CHAR) {
